@@ -8,6 +8,25 @@ from ..deps import get_db
 router = APIRouter(prefix="/posts", tags=["Posts"])
 
 
+@router.get("", response_model=List[schemas.PostOut])
+def list_posts(
+    tag: Optional[str] = Query(default=None, description="Filter by tag name"),
+    db: Session = Depends(get_db),
+):
+    stmt = select(models.Post)
+    if tag:
+        stmt = stmt.join(models.Post.tags).where(models.Tag.name == tag)
+    return db.scalars(stmt).unique().all()
+
+
+@router.get("/{post_id}", response_model=schemas.PostOut)
+def get_post(post_id: int, db: Session = Depends(get_db)):
+    post = db.get(models.Post, post_id)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return post
+
+
 @router.post("", response_model=schemas.PostOut, status_code=201)
 def create_post(payload: schemas.PostCreate, db: Session = Depends(get_db)):
     author = db.get(models.User, payload.author_id)
@@ -31,25 +50,6 @@ def create_post(payload: schemas.PostCreate, db: Session = Depends(get_db)):
     db.add(post)
     db.commit()
     db.refresh(post)
-    return post
-
-
-@router.get("", response_model=List[schemas.PostOut])
-def list_posts(
-    tag: Optional[str] = Query(default=None, description="Filter by tag name"),
-    db: Session = Depends(get_db),
-):
-    stmt = select(models.Post)
-    if tag:
-        stmt = stmt.join(models.Post.tags).where(models.Tag.name == tag)
-    return db.scalars(stmt).unique().all()
-
-
-@router.get("/{post_id}", response_model=schemas.PostOut)
-def get_post(post_id: int, db: Session = Depends(get_db)):
-    post = db.get(models.Post, post_id)
-    if not post:
-        raise HTTPException(status_code=404, detail="Post not found")
     return post
 
 
