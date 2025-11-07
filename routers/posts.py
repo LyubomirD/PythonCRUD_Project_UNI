@@ -90,7 +90,7 @@ def delete_post(post_id: int, db: Session = Depends(get_db)):
     return
 
 
-# All comments for a specific post
+# All comments for a specific post, from a list
 @router.get("/{post_id}/comments", response_model=List[schemas.CommentOut])
 def get_comments_for_post(post_id: int, db: Session = Depends(get_db)):
     post = db.get(models.Post, post_id)
