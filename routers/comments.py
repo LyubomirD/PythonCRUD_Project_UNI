@@ -44,15 +44,15 @@ def create_comment_for_post(
     return comment
 
 
-@router.post("", response_model=schemas.CommentOut, status_code=201)
-def create_comment(payload: schemas.CommentCreate, db: Session = Depends(get_db)):
-    if not db.get(models.User, payload.author_id):
-        raise HTTPException(status_code=400, detail="Invalid author_id")
-    comment = models.Comment(**payload.dict())
-    db.add(comment)
-    db.commit()
-    db.refresh(comment)
-    return comment
+# @router.post("", response_model=schemas.CommentOut, status_code=201)
+# def create_comment(payload: schemas.CommentCreate, db: Session = Depends(get_db)):
+#     if not db.get(models.User, payload.author_id):
+#         raise HTTPException(status_code=400, detail="Invalid author_id")
+#     comment = models.Comment(**payload.dict())
+#     db.add(comment)
+#     db.commit()
+#     db.refresh(comment)
+#     return comment
 
 
 @router.put("/{comment_id}", response_model=schemas.CommentOut)
